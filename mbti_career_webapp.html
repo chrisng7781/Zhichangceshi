@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>职业 MBTI 未来方向分析小程序</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --primary:#2563eb;
+      --primary2:#1d4ed8;
+      --soft:#dbeafe;
+      --success:#16a34a;
+      --warn:#f59e0b;
+      --danger:#dc2626;
+      --shadow:0 18px 45px rgba(15,23,42,.10);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(22,163,74,.13), transparent 32%),
+        var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      width:min(1180px,92vw);
+      margin:0 auto;
+      padding:34px 0 48px;
+    }
+    .hero{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:22px;
+      align-items:stretch;
+      margin-bottom:22px;
+    }
+    .hero-main,.hero-side,.card{
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(255,255,255,.72);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      backdrop-filter: blur(10px);
+    }
+    .hero-main{padding:34px}
+    .hero-side{padding:26px}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--soft);
+      color:var(--primary2);
+      font-weight:700;
+      font-size:13px;
+      margin-bottom:16px;
+    }
+    h1{
+      margin:0 0 12px;
+      font-size: clamp(30px, 5vw, 52px);
+      letter-spacing:-1.5px;
+      line-height:1.06;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:17px;
+      line-height:1.75;
+    }
+    .hero-side h3{margin:0 0 12px;font-size:20px}
+    .hero-side ul{margin:12px 0 0;padding-left:20px;color:var(--muted);line-height:1.85}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+    }
+    .card{padding:26px;margin-bottom:18px}
+    .card h2{
+      margin:0 0 14px;
+      font-size:22px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .step{
+      display:inline-flex;
+      width:30px;height:30px;
+      align-items:center;justify-content:center;
+      border-radius:10px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-size:14px;
+      font-weight:800;
+    }
+    label{
+      display:block;
+      font-weight:700;
+      margin:18px 0 8px;
+      color:#374151;
+    }
+    select, input[type="text"]{
+      width:100%;
+      padding:14px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      font-size:15px;
+      outline:none;
+      transition:.2s;
+    }
+    select:focus,input[type="text"]:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+    .choice-group{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .choice{
+      position:relative;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 14px 14px 44px;
+      background:#fff;
+      cursor:pointer;
+      transition:.18s;
+      min-height:74px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .choice input{
+      position:absolute;
+      left:14px;top:19px;
+      transform:scale(1.15);
+    }
+    .choice:hover{
+      transform:translateY(-2px);
+      border-color:#bfdbfe;
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
+    }
+    .choice strong{font-size:14px}
+    .choice span{color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
+    .buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:24px;
+    }
+    button{
+      border:0;
+      border-radius:14px;
+      padding:14px 18px;
+      font-weight:800;
+      font-size:15px;
+      cursor:pointer;
+      transition:.18s;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--primary),#0f766e);
+      color:white;
+      box-shadow:0 12px 26px rgba(37,99,235,.24);
+    }
+    .btn-primary:hover{transform:translateY(-2px)}
+    .btn-secondary{background:#eef2f7;color:#374151}
+    .btn-secondary:hover{background:#e5e7eb}
+    .result{
+      display:none;
+      animation:show .35s ease both;
+    }
+    @keyframes show{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .result-top{
+      display:grid;
+      grid-template-columns:.75fr 1.25fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    .type-box{
+      border-radius:22px;
+      padding:26px;
+      background:linear-gradient(160deg,#1d4ed8,#0f766e);
+      color:white;
+      min-height:260px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .type-box .small{opacity:.85;font-size:14px}
+    .mbti{
+      font-size:58px;
+      font-weight:900;
+      letter-spacing:2px;
+      margin:8px 0 2px;
+    }
+    .role-name{font-size:21px;font-weight:800;margin-bottom:8px}
+    .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:7px 10px;
+      background:rgba(255,255,255,.17);
+      font-size:12px;
+      font-weight:700;
+    }
+    .analysis-box{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+      background:#fff;
+    }
+    .analysis-box h3{margin:0 0 10px}
+    .analysis-box p{color:var(--muted);line-height:1.75;margin:0 0 12px}
+    .score-bars{
+      display:grid;
+      gap:12px;
+      margin-top:18px;
+    }
+    .bar-row{
+      display:grid;
+      grid-template-columns:70px 1fr 70px;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      color:#4b5563;
+      font-weight:700;
+    }
+    .bar{
+      height:12px;
+      background:#e5e7eb;
+      border-radius:999px;
+      position:relative;
+      overflow:hidden;
+    }
+    .bar span{
+      position:absolute;
+      top:0;left:50%;
+      height:100%;
+      width:0;
+      background:linear-gradient(90deg,#60a5fa,#22c55e);
+      border-radius:999px;
+      transform-origin:left center;
+      transition:.45s;
+    }
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-top:18px;
+    }
+    .mini-card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:18px;
+    }
+    .mini-card h3{margin:0 0 10px;font-size:18px}
+    .mini-card ul{margin:0;padding-left:20px;color:var(--muted);line-height:1.75}
+    .path{
+      display:grid;
+      gap:12px;
+    }
+    .path-item{
+      display:grid;
+      grid-template-columns:42px 1fr;
+      gap:12px;
+      align-items:start;
+      padding:14px;
+      border-radius:16px;
+      background:#f9fafb;
+      border:1px solid #eef2f7;
+    }
+    .num{
+      width:42px;height:42px;
+      display:flex;align-items:center;justify-content:center;
+      border-radius:14px;
+      background:#e0f2fe;
+      color:#0369a1;
+      font-weight:900;
+    }
+    .path-item strong{display:block;margin-bottom:4px}
+    .path-item span{color:var(--muted);line-height:1.55}
+    .footer-note{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
+      margin-top:12px;
+    }
+    .error{
+      display:none;
+      background:#fef2f2;
+      color:#991b1b;
+      border:1px solid #fecaca;
+      padding:12px 14px;
+      border-radius:14px;
+      margin-top:16px;
+      font-weight:700;
+    }
+    @media(max-width:900px){
+      .hero,.grid,.result-top,.two-col{grid-template-columns:1fr}
+      .choice-group{grid-template-columns:1fr}
+      .hero-main{padding:26px}
+      .mbti{font-size:46px}
+    }
+    @media print{
+      body{background:#fff}
+      .hero,.form-area,.buttons .no-print{display:none!important}
+      .wrap{width:100%;padding:0}
+      .card,.hero-main,.hero-side{box-shadow:none;border:1px solid #ddd}
+      .result{display:block!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-main">
+        <div class="tag">职业方向 × MBTI 倾向 × 未来规划</div>
+        <h1>未来职业去向分析小程序</h1>
+        <p class="subtitle">
+          让用户选择工作领域、职位阶段、未来目标与行为偏好，系统会估算 MBTI 倾向，
+          并输出适合的发展路线、潜在优势、风险提醒与 90 天行动建议。
+        </p>
+      </div>
+      <div class="hero-side">
+        <h3>适合用途</h3>
+        <ul>
+          <li>招聘前测 / 职涯咨询 / 校园辅导</li>
+          <li>企业内部人才发展方向分析</li>
+          <li>销售、技术、管理、创业路线判断</li>
+          <li>可再扩展为会员系统、报告 PDF、后台数据库</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="grid form-area">
+      <div class="card">
+        <h2><span class="step">1</span>基础选择</h2>
+
+        <label for="name">用户姓名 / 昵称</label>
+        <input id="name" type="text" placeholder="例如：Alex / 小明 / Candidate A" />
+
+        <label for="field">目前或感兴趣的工作领域</label>
+        <select id="field">
+          <option value="">请选择领域</option>
+          <option value="sales">销售 / 市场 / Business Development</option>
+          <option value="engineering">工程 / 技术 / 维修 / IT</option>
+          <option value="operation">生产 / 物流 / 供应链 / 现场营运</option>
+          <option value="finance">会计 / 财务 / 审计 / 行政</option>
+          <option value="design">设计 / 内容 / 创意 / 品牌</option>
+          <option value="education">教育 / 培训 / 咨询 / HR</option>
+          <option value="management">管理 / 企业策略 / 项目管理</option>
+          <option value="entrepreneur">创业 / 自由职业 / 电商</option>
+        </select>
+
+        <label for="position">目前职位阶段</label>
+        <select id="position">
+          <option value="">请选择职位阶段</option>
+          <option value="student">学生 / 实习生 / 刚毕业</option>
+          <option value="junior">基层员工 / Junior Executive</option>
+          <option value="specialist">专业人员 / Specialist</option>
+          <option value="salesperson">销售人员 / Account Executive</option>
+          <option value="supervisor">主管 / Team Leader</option>
+          <option value="manager">经理 / Department Head</option>
+          <option value="owner">老板 / 创办人 / 合伙人</option>
+        </select>
+
+        <label for="goal">未来 3-5 年目标</label>
+        <select id="goal">
+          <option value="">请选择未来目标</option>
+          <option value="stable">稳定收入与生活平衡</option>
+          <option value="income">提高收入与业绩表现</option>
+          <option value="expert">成为专业领域专家</option>
+          <option value="leader">成为管理者或领导团队</option>
+          <option value="creative">发展个人品牌与创意作品</option>
+          <option value="business">创业 / 接班 / 建立自己的事业</option>
+          <option value="overseas">海外发展 / 跨国公司 / 国际视野</option>
+          <option value="impact">帮助别人 / 社会影响力 / 教育培训</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h2><span class="step">2</span>行为偏好</h2>
+
+        <label>面对工作压力时，你更像哪一种？</label>
+        <div class="choice-group" data-question="energy">
+          <label class="choice">
+            <input type="radio" name="energy" value="E" />
+            <strong>越多人越有动力</strong>
+            <span>喜欢沟通、讨论、现场解决问题</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="energy" value="I" />
+            <strong>需要安静整理思路</strong>
+            <span>喜欢独立分析、深度思考后行动</span>
+          </label>
+        </div>
+
+        <label>做决定时，你比较依赖什么？</label>
+        <div class="choice-group" data-question="info">
+          <label class="choice">
+            <input type="radio" name="info" value="S" />
+            <strong>事实、经验、数据</strong>
+            <span>看重可执行、可验证、现实结果</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="info" value="N" />
+            <strong>趋势、可能性、未来机会</strong>
+            <span>看重创新、商业模式、长期想象</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="step">3</span>工作风格</h2>
+
+        <label>处理人和事的冲突时，你更重视？</label>
+        <div class="choice-group">
+          <label class="choice">
+            <input type="radio" name="decision" value="T" />
+            <strong>逻辑、公平、原则</strong>
+            <span>先看制度、目标、效率和结果</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="decision" value="F" />
+            <strong>关系、感受、团队气氛</strong>
+            <span>先看人心、沟通、互相理解</span>
+          </label>
+        </div>
+
+        <label>你喜欢怎样推进目标？</label>
+        <div class="choice-group">
+          <label class="choice">
+            <input type="radio" name="life" value="J" />
+            <strong>计划清楚，按步骤完成</strong>
+            <span>喜欢时间表、流程、责任分配</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="life" value="P" />
+            <strong>保持弹性，边做边调整</strong>
+            <span>喜欢探索机会、快速试错</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="step">4</span>价值观判断</h2>
+
+        <label>你最希望别人如何评价你？</label>
+        <div class="choice-group">
+          <label class="choice">
+            <input type="radio" name="identity" value="performance" />
+            <strong>有结果、有能力、能解决问题</strong>
+            <span>重视表现、专业、成绩</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="identity" value="influence" />
+            <strong>有影响力、能带动别人</strong>
+            <span>重视领导、表达、人脉</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="identity" value="expertise" />
+            <strong>很专业、值得信任</strong>
+            <span>重视技术、知识、长期积累</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="identity" value="freedom" />
+            <strong>自由、有创意、有自己的路</strong>
+            <span>重视独立、创新、选择权</span>
+          </label>
+        </div>
+
+        <div class="error" id="error">请完成所有选择后再生成分析报告。</div>
+
+        <div class="buttons">
+          <button class="btn-primary" onclick="generateReport()">生成未来去向分析</button>
+          <button class="btn-secondary no-print" onclick="resetForm()">重新填写</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="result" class="result card">
+      <h2><span class="step">✓</span>分析结果</h2>
+
+      <div class="result-top">
+        <div class="type-box">
+          <div>
+            <div class="small" id="resultName">你的 MBTI 倾向</div>
+            <div class="mbti" id="mbtiText">ENTJ</div>
+            <div class="role-name" id="typeTitle">战略型领导者</div>
+            <div id="typeDesc" class="small"></div>
+          </div>
+          <div class="pill-row" id="pillRow"></div>
+        </div>
+
+        <div class="analysis-box">
+          <h3>核心判断</h3>
+          <p id="mainAnalysis"></p>
+
+          <div class="score-bars">
+            <div class="bar-row"><span>E 外向</span><div class="bar"><span id="barEI"></span></div><span>I 内向</span></div>
+            <div class="bar-row"><span>S 实感</span><div class="bar"><span id="barSN"></span></div><span>N 直觉</span></div>
+            <div class="bar-row"><span>T 理性</span><div class="bar"><span id="barTF"></span></div><span>F 情感</span></div>
+            <div class="bar-row"><span>J 判断</span><div class="bar"><span id="barJP"></span></div><span>P 知觉</span></div>
+          </div>
+          <p class="footer-note">说明：此工具是职业倾向分析，不是医学或心理诊断。结果适合用作沟通、辅导与职业规划参考。</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <h3>适合发展的方向</h3>
+          <ul id="careerList"></ul>
+        </div>
+        <div class="mini-card">
+          <h3>需要注意的风险</h3>
+          <ul id="riskList"></ul>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <h3>90 天行动路线</h3>
+          <div class="path" id="actionPath"></div>
+        </div>
+        <div class="mini-card">
+          <h3>推荐能力组合</h3>
+          <ul id="skillList"></ul>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-primary no-print" onclick="window.print()">打印 / 保存成 PDF</button>
+        <button class="btn-secondary no-print" onclick="copyReport()">复制分析文字</button>
+      </div>
+    </section>
+  </div>
+
+<script>
+const typeProfiles = {
+  ISTJ:["可靠执行者","适合制度清楚、流程严谨、需要准确性的岗位。你擅长把复杂工作标准化，并持续稳定交付。"],
+  ISFJ:["细节守护者","适合服务、支持、行政、客户关系与稳定型团队角色。你重视责任感与长期信任。"],
+  INFJ:["使命型规划者","适合咨询、教育、品牌、组织发展与需要洞察人性的工作。你适合做长期有意义的项目。"],
+  INTJ:["战略架构师","适合策略、技术规划、系统设计与企业转型。你擅长看长期趋势并设计解决方案。"],
+  ISTP:["问题解决技师","适合技术维修、工程、现场排障、机械与系统优化。你擅长用最直接的方法解决实际问题。"],
+  ISFP:["体验型创作者","适合设计、内容、服务体验、品牌视觉与灵活项目。你重视美感、自由和真实表达。"],
+  INFP:["价值创造者","适合内容、教育、辅导、公益、品牌故事与创意工作。你需要与价值观一致的方向。"],
+  INTP:["逻辑研究者","适合数据、研发、系统分析、软件、研究与复杂问题拆解。你擅长找出底层原理。"],
+  ESTP:["机会型行动者","适合销售、谈判、现场管理、创业开拓与快节奏市场。你靠行动和反应速度赢得机会。"],
+  ESFP:["人气推动者","适合销售、活动、服务、直播、培训与客户互动。你擅长带动气氛和建立关系。"],
+  ENFP:["创意连接者","适合品牌、市场、创业、内容、培训与跨界项目。你擅长连接人、想法与机会。"],
+  ENTP:["创新挑战者","适合商业开发、创业、产品策略、谈判和新项目探索。你擅长突破旧框架。"],
+  ESTJ:["效率管理者","适合运营管理、销售管理、项目管理、制度建设与团队执行。你擅长把目标变成结果。"],
+  ESFJ:["团队组织者","适合客户成功、人事、培训、行政管理和服务型领导。你擅长照顾关系并推动团队协作。"],
+  ENFJ:["影响力领导者","适合管理、培训、销售领导、组织发展与公众表达。你擅长激励他人一起前进。"],
+  ENTJ:["战略型领导者","适合企业管理、创业、销售战略、项目统筹和业务扩张。你擅长设定目标、组织资源和推动结果。"]
+};
+
+const fieldData = {
+  sales:{
+    boost:{E:2,N:1,T:1,P:1},
+    careers:["B2B 销售 / Key Account Manager","Business Development / 市场开拓","销售主管 / 区域经理","产品顾问 / 解决方案顾问"],
+    skills:["客户需求分析","谈判与成交能力","CRM 跟进系统","行业知识与产品方案表达"]
+  },
+  engineering:{
+    boost:{I:1,S:2,T:2,J:1},
+    careers:["技术工程师 / 维修主管","系统集成 / 自动化工程","产品测试与质量管理","技术顾问 / 售前工程师"],
+    skills:["技术文档能力","故障排查流程","数据与仪器分析","项目交付管理"]
+  },
+  operation:{
+    boost:{S:2,J:2,T:1},
+    careers:["生产管理 / 现场主管","物流与供应链管理","流程改善 / Lean Operation","仓储与库存控制"],
+    skills:["SOP 建立","现场协调能力","成本与效率分析","安全与质量意识"]
+  },
+  finance:{
+    boost:{I:1,S:2,T:2,J:2},
+    careers:["会计 / 财务主管","审计 / 内控 / 成本分析","行政管理","数据报表与预算规划"],
+    skills:["Excel / SQL / ERP","成本核算","合规与风险控制","细节检查能力"]
+  },
+  design:{
+    boost:{N:2,F:1,P:2,I:1},
+    careers:["品牌设计 / 内容创作","UI/UX / 视觉传达","社交媒体与广告创意","产品包装与用户体验"],
+    skills:["作品集建设","用户洞察","视觉表达","AI 内容工具使用"]
+  },
+  education:{
+    boost:{F:2,N:1,E:1,J:1},
+    careers:["培训师 / 企业内训","教育顾问 / HRD","职业规划顾问","课程设计与内容知识产品"],
+    skills:["表达与教学设计","辅导沟通","课程产品化","社群经营"]
+  },
+  management:{
+    boost:{E:1,N:1,T:1,J:2},
+    careers:["部门经理 / 项目经理","企业策略与流程改革","团队领导 / 绩效管理","跨部门协调负责人"],
+    skills:["目标拆解","领导沟通","预算与资源配置","绩效管理"]
+  },
+  entrepreneur:{
+    boost:{E:1,N:2,T:1,P:1},
+    careers:["创业者 / 合伙人","电商与个人品牌","新业务开发","顾问型自由职业"],
+    skills:["商业模式设计","现金流管理","销售获客","快速试错与复盘"]
+  }
+};
+
+const goalBoosts = {
+  stable:{S:2,J:2,I:1},
+  income:{E:2,T:1,J:1},
+  expert:{I:1,S:1,T:2,J:1},
+  leader:{E:2,T:1,J:2},
+  creative:{N:2,F:1,P:2},
+  business:{E:1,N:2,T:1,P:1},
+  overseas:{E:1,N:2,T:1,P:1},
+  impact:{F:2,E:1,N:1,J:1}
+};
+
+const positionBoosts = {
+  student:{N:1,P:1},
+  junior:{S:1,J:1},
+  specialist:{I:1,T:1,S:1},
+  salesperson:{E:2,P:1},
+  supervisor:{E:1,J:2},
+  manager:{E:1,T:1,J:2},
+  owner:{E:1,N:1,T:1,J:1}
+};
+
+const risksByAxis = {
+  E:["容易过度依赖外部反馈，建议保留独立思考时间。"],
+  I:["容易想太多才行动，建议训练表达与主动争取机会。"],
+  S:["容易太保守，建议定期观察市场趋势与新工具。"],
+  N:["容易想法太多但落地不足，建议建立执行清单与期限。"],
+  T:["容易忽略团队情绪，建议加强同理沟通与激励方式。"],
+  F:["容易为了关系而回避困难决定，建议训练原则与边界感。"],
+  J:["容易对变化焦虑，建议保留 20% 弹性空间。"],
+  P:["容易拖延或分散，建议用短周期目标逼近结果。"]
+};
+
+function val(name){
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : "";
+}
+
+function addScore(scores, key, amount){
+  scores[key] = (scores[key] || 0) + amount;
+}
+
+function applyBoost(scores, boost){
+  Object.entries(boost || {}).forEach(([k,v])=>addScore(scores,k,v));
+}
+
+function generateReport(){
+  const name = document.getElementById("name").value.trim() || "你";
+  const field = document.getElementById("field").value;
+  const position = document.getElementById("position").value;
+  const goal = document.getElementById("goal").value;
+  const energy = val("energy");
+  const info = val("info");
+  const decision = val("decision");
+  const life = val("life");
+  const identity = val("identity");
+
+  if(!field || !position || !goal || !energy || !info || !decision || !life || !identity){
+    document.getElementById("error").style.display = "block";
+    return;
+  }
+  document.getElementById("error").style.display = "none";
+
+  const scores = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  [energy, info, decision, life].forEach(k => addScore(scores,k,4));
+  applyBoost(scores, fieldData[field].boost);
+  applyBoost(scores, goalBoosts[goal]);
+  applyBoost(scores, positionBoosts[position]);
+
+  if(identity === "performance"){ applyBoost(scores,{T:2,J:1}); }
+  if(identity === "influence"){ applyBoost(scores,{E:2,N:1}); }
+  if(identity === "expertise"){ applyBoost(scores,{I:1,S:1,T:2}); }
+  if(identity === "freedom"){ applyBoost(scores,{N:2,P:2}); }
+
+  const mbti = [
+    scores.E >= scores.I ? "E" : "I",
+    scores.S >= scores.N ? "S" : "N",
+    scores.T >= scores.F ? "T" : "F",
+    scores.J >= scores.P ? "J" : "P"
+  ].join("");
+
+  const profile = typeProfiles[mbti] || ["职业探索者","你正在形成自己的职业风格，建议通过项目实践验证方向。"];
+
+  document.getElementById("resultName").textContent = `${name} 的 MBTI 职业倾向`;
+  document.getElementById("mbtiText").textContent = mbti;
+  document.getElementById("typeTitle").textContent = profile[0];
+  document.getElementById("typeDesc").textContent = profile[1];
+
+  const fieldText = document.getElementById("field").selectedOptions[0].textContent;
+  const posText = document.getElementById("position").selectedOptions[0].textContent;
+  const goalText = document.getElementById("goal").selectedOptions[0].textContent;
+
+  document.getElementById("mainAnalysis").textContent =
+    `${name} 目前选择的领域是「${fieldText}」，职位阶段为「${posText}」，未来目标是「${goalText}」。综合判断，你更适合走一条把个人特质与实际职业目标结合的路线。你的优势不是单一性格，而是可以通过正确岗位、能力组合和行动节奏，把性格倾向转化为职业竞争力。`;
+
+  const pills = [
+    `领域：${fieldText.split(" / ")[0]}`,
+    `阶段：${posText.split(" / ")[0]}`,
+    `目标：${goalText.split(" / ")[0]}`,
+    `类型：${profile[0]}`
+  ];
+  document.getElementById("pillRow").innerHTML = pills.map(p=>`<span class="pill">${p}</span>`).join("");
+
+  setBar("barEI", scores.E, scores.I);
+  setBar("barSN", scores.S, scores.N);
+  setBar("barTF", scores.T, scores.F);
+  setBar("barJP", scores.J, scores.P);
+
+  const careers = [...fieldData[field].careers];
+  if(goal === "business") careers.unshift("新业务负责人 / 创业合伙人");
+  if(goal === "leader") careers.unshift("团队主管 / 部门管理者");
+  if(goal === "expert") careers.unshift("高级专家 / 技术顾问");
+  if(goal === "income") careers.unshift("高绩效销售 / 业绩型岗位");
+  renderList("careerList", [...new Set(careers)].slice(0,6));
+
+  const dominant = [
+    scores.E >= scores.I ? "E" : "I",
+    scores.S >= scores.N ? "S" : "N",
+    scores.T >= scores.F ? "T" : "F",
+    scores.J >= scores.P ? "J" : "P"
+  ];
+  const risks = dominant.flatMap(k=>risksByAxis[k]).slice(0,4);
+  renderList("riskList", risks);
+
+  const skills = [...fieldData[field].skills];
+  if(goal === "overseas") skills.push("英文商务沟通与跨文化合作");
+  if(goal === "business") skills.push("商业计划、报价、利润与现金流控制");
+  if(goal === "leader") skills.push("招聘、授权、绩效复盘");
+  if(goal === "creative") skills.push("AI 设计、短视频与内容发布节奏");
+  renderList("skillList", [...new Set(skills)].slice(0,7));
+
+  const action = buildActionPath(goal, field, mbti);
+  document.getElementById("actionPath").innerHTML = action.map((a,i)=>`
+    <div class="path-item">
+      <div class="num">${i+1}</div>
+      <div><strong>${a.title}</strong><span>${a.desc}</span></div>
+    </div>
+  `).join("");
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function setBar(id,left,right){
+  const total = Math.max(left+right,1);
+  const percent = Math.round((right/total)*100);
+  const el = document.getElementById(id);
+  if(percent >= 50){
+    el.style.left = "50%";
+    el.style.width = `${percent-50}%`;
+    el.style.transform = "scaleX(2)";
+  }else{
+    el.style.left = `${percent}%`;
+    el.style.width = `${50-percent}%`;
+    el.style.transform = "scaleX(2)";
+  }
+}
+
+function renderList(id, arr){
+  document.getElementById(id).innerHTML = arr.map(x=>`<li>${x}</li>`).join("");
+}
+
+function buildActionPath(goal, field, mbti){
+  const base = [
+    {title:"第 1-30 天：确认定位", desc:"整理你的优势、弱点、目标行业与目标岗位，选择一个最想验证的方向。"},
+    {title:"第 31-60 天：建立作品或成果", desc:"完成一个能证明能力的小项目，例如案例报告、销售方案、技术改善、内容作品或流程优化。"},
+    {title:"第 61-90 天：争取真实反馈", desc:"向上司、客户、同行或导师展示成果，收集反馈并调整下一阶段路线。"}
+  ];
+  if(goal === "income"){
+    base[1].desc = "建立客户名单、报价话术、跟进节奏和成交复盘表，用数据提升转化率。";
+  }
+  if(goal === "leader"){
+    base[1].desc = "主动承担一个小团队或小项目，练习分工、会议、进度追踪与复盘。";
+  }
+  if(goal === "business"){
+    base[1].desc = "设计一个最小可行商业方案：目标客户、价格、成本、获客渠道和现金流。";
+  }
+  if(goal === "expert"){
+    base[1].desc = "选择一个专业主题，做成 SOP、技术文章、培训材料或案例库，建立专家形象。";
+  }
+  if(goal === "creative"){
+    base[1].desc = "固定每周发布作品，建立作品集、内容主题和个人品牌识别。";
+  }
+  return base;
+}
+
+function resetForm(){
+  document.querySelectorAll("input").forEach(i=>{
+    if(i.type==="radio") i.checked=false;
+    if(i.type==="text") i.value="";
+  });
+  document.querySelectorAll("select").forEach(s=>s.value="");
+  document.getElementById("result").style.display="none";
+  document.getElementById("error").style.display="none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function copyReport(){
+  const text = [
+    "MBTI 职业倾向：" + document.getElementById("mbtiText").textContent,
+    "类型：" + document.getElementById("typeTitle").textContent,
+    "说明：" + document.getElementById("typeDesc").textContent,
+    "",
+    "核心判断：",
+    document.getElementById("mainAnalysis").textContent,
+    "",
+    "适合方向：",
+    [...document.querySelectorAll("#careerList li")].map((li,i)=>`${i+1}. ${li.textContent}`).join("\n"),
+    "",
+    "风险提醒：",
+    [...document.querySelectorAll("#riskList li")].map((li,i)=>`${i+1}. ${li.textContent}`).join("\n"),
+    "",
+    "推荐能力：",
+    [...document.querySelectorAll("#skillList li")].map((li,i)=>`${i+1}. ${li.textContent}`).join("\n")
+  ].join("\n");
+  navigator.clipboard.writeText(text).then(()=>alert("分析文字已复制。"));
+}
+</script>
+</body>
+</html>
